@@ -19,6 +19,11 @@ export type Restaurant = {
   deliveryFee?: number;
   distance?: number;
   createdAt?: Date;
+  openingHours?: string;
+  closingHours?: string;
+  isOpen?: boolean;
+  serviceAreas?: string[];
+  ownerId?: number;
 };
 
 export type FoodItem = {
@@ -31,6 +36,7 @@ export type FoodItem = {
   category?: string;
   isPopular?: boolean;
   createdAt?: Date;
+  isAvailable?: boolean;
 };
 
 export type Category = {
@@ -63,6 +69,8 @@ export type Order = {
   note?: string;
   createdAt: Date;
   items?: OrderItem[];
+  customerName?: string;
+  customerPhone?: string;
 };
 
 export type OrderItem = {
@@ -84,4 +92,35 @@ export type User = {
   avatar?: string;
   address?: string;
   createdAt?: Date;
+  role?: 'customer' | 'owner' | 'admin';
+};
+
+export type DashboardStats = {
+  pendingOrders: number;
+  completedOrders: number;
+  todayRevenue: number;
+  availableItems: number;
+  notifications: Notification[];
+};
+
+export type Notification = {
+  id: number;
+  title: string;
+  message: string;
+  type: 'order' | 'system' | 'revenue';
+  isRead: boolean;
+  createdAt: Date;
+};
+
+export type SalesData = {
+  date: string;
+  revenue: number;
+  orders: number;
+};
+
+export type TopSellingItem = {
+  id: number;
+  name: string;
+  quantity: number;
+  revenue: number;
 };

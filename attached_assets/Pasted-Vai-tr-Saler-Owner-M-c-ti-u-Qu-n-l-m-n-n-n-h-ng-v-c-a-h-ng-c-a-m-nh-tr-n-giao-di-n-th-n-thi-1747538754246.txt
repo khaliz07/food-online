@@ -1,0 +1,139 @@
+Vai trò: Saler/Owner
+Mục tiêu: Quản lý món ăn, đơn hàng và cửa hàng của mình trên giao diện thân thiện, dễ dùng trên mobile.
+ 
+🍽️ 2. Màn hình Dashboard (Tổng quan)
+Mục đích:
+Tổng quan nhanh về hoạt động hôm nay
+
+Hiển thị thông báo đơn mới
+
+Thông tin hiển thị:
+📦 Số đơn đang xử lý / đã hoàn thành
+
+💰 Doanh thu hôm nay
+
+🧾 Số món đang mở bán
+
+Thành phần Mantine:
+Card, Grid, Stats (để hiển thị các chỉ số)
+
+Notification (khi có đơn mới)
+
+Button → chuyển nhanh sang xử lý đơn hoặc quản lý món ăn
+
+🧾 3. Màn hình Quản lý đơn hàng
+Mục đích:
+Xem, xử lý các đơn theo trạng thái
+
+Tabs:
+🆕 Mới nhận
+
+👨‍🍳 Đang chuẩn bị
+
+✅ Sẵn sàng giao
+
+❌ Đã hủy
+
+Mỗi đơn hàng gồm:
+Mã đơn, thời gian đặt
+
+Danh sách món, ghi chú
+
+Thông tin giao hàng (khu vực, người nhận)
+
+Button hành động:
+
+✅ Xác nhận → Đang chuẩn bị
+
+📦 Hoàn tất chuẩn bị
+
+❌ Từ chối đơn
+
+Thành phần Mantine:
+Tabs, Card, Badge, Button, Accordion (hiển thị chi tiết món)
+
+Modal để xác nhận hủy đơn hoặc giao cho shipper
+
+🧂 4. Màn hình Quản lý món ăn
+Mục đích:
+Thêm, chỉnh sửa, xóa hoặc tạm ẩn món ăn
+
+Tính năng:
+Danh sách món:
+
+Ảnh món
+
+Tên, giá, mô tả ngắn
+
+Nút: 🖋️ Chỉnh sửa | 👁️ Tạm ẩn | 🗑️ Xoá
+
+Thêm món mới:
+
+TextInput (tên)
+
+Textarea (mô tả)
+
+NumberInput (giá)
+
+FileInput (ảnh món)
+
+Select (nhóm món)
+
+Thành phần Mantine:
+Card + Group + Image
+
+Drawer hoặc Modal để tạo món
+
+Button, Switch, Textarea, TextInput, FileInput
+
+🏪 5. Màn hình Quản lý cửa hàng
+Mục đích:
+Cập nhật thông tin cơ bản của quán
+
+Thông tin chỉnh sửa:
+Tên cửa hàng
+
+Mô tả
+
+Giờ mở cửa – đóng cửa (TimeInput)
+
+Khu vực phục vụ (Select, MultiSelect)
+
+Trạng thái hoạt động: Mở / Tạm nghỉ (Switch)
+
+📊 6. Màn hình Thống kê / Doanh thu
+Mục đích:
+Xem báo cáo đơn hàng và doanh thu theo ngày/tuần/tháng
+
+Gồm:
+Doanh thu tổng
+
+Số đơn mỗi ngày
+
+Món ăn bán chạy
+
+Thành phần Mantine:
+DatePicker, SegmentedControl (chọn ngày / tuần / tháng)
+
+Card, Text, Badge, BarChart (dùng thư viện chart như recharts, chart.js)
+
+👤 7. Màn hình Tài khoản cá nhân
+Mục đích:
+Quản lý thông tin đăng nhập
+
+Đăng xuất, đổi mật khẩu
+
+Gồm:
+Tên chủ quán
+
+Email / số điện thoại
+
+Nút “Đổi mật khẩu”
+
+Nút “Đăng xuất”
+
+📥 8. Màn hình Thông báo (optional)
+Gồm:
+Danh sách các sự kiện: đơn bị hủy, món bị báo lỗi, doanh thu đạt mốc
+
+Sử dụng Notification, Timeline hoặc Accordion
