@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -25,47 +25,49 @@ import OwnerProfile from "@/pages/owner/profile";
 import OwnerNotifications from "@/pages/owner/notifications";
 import OwnerLayout from "@/components/owner/OwnerLayout";
 
-function Router() {
+// Route helper component to differentiate between owner and customer routes
+function RouteManager() {
+  const [location] = useLocation();
+  
+  // Check if current path is an owner path
+  const isOwnerPath = location.startsWith('/owner');
+  
+  if (isOwnerPath) {
+    return (
+      <OwnerLayout>
+        <Switch>
+          <Route path="/owner" component={OwnerDashboard} />
+          <Route path="/owner/orders" component={OwnerOrders} />
+          <Route path="/owner/menu" component={OwnerMenu} />
+          <Route path="/owner/restaurant" component={OwnerRestaurant} />
+          <Route path="/owner/stats" component={OwnerStats} />
+          <Route path="/owner/profile" component={OwnerProfile} />
+          <Route path="/owner/notifications" component={OwnerNotifications} />
+          <Route>
+            <NotFound />
+          </Route>
+        </Switch>
+      </OwnerLayout>
+    );
+  }
+  
+  // Default to customer layout
   return (
-    <Switch>
-      {/* Customer routes */}
-      <Route path="/">
-        {() => (
-          <AppLayout>
-            <Switch>
-              <Route path="/" component={HomePage} />
-              <Route path="/restaurant/:id" component={RestaurantPage} />
-              <Route path="/cart" component={CartPage} />
-              <Route path="/checkout" component={CheckoutPage} />
-              <Route path="/tracking/:id" component={TrackingPage} />
-              <Route path="/search" component={SearchPage} />
-              <Route path="/orders" component={OrdersPage} />
-              <Route path="/profile" component={ProfilePage} />
-            </Switch>
-          </AppLayout>
-        )}
-      </Route>
-      
-      {/* Owner/Saler routes */}
-      <Route path="/owner">
-        {() => (
-          <OwnerLayout>
-            <Switch>
-              <Route path="/owner" component={OwnerDashboard} />
-              <Route path="/owner/orders" component={OwnerOrders} />
-              <Route path="/owner/menu" component={OwnerMenu} />
-              <Route path="/owner/restaurant" component={OwnerRestaurant} />
-              <Route path="/owner/stats" component={OwnerStats} />
-              <Route path="/owner/profile" component={OwnerProfile} />
-              <Route path="/owner/notifications" component={OwnerNotifications} />
-            </Switch>
-          </OwnerLayout>
-        )}
-      </Route>
-      
-      {/* 404 route */}
-      <Route component={NotFound} />
-    </Switch>
+    <AppLayout>
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="/restaurant/:id" component={RestaurantPage} />
+        <Route path="/cart" component={CartPage} />
+        <Route path="/checkout" component={CheckoutPage} />
+        <Route path="/tracking/:id" component={TrackingPage} />
+        <Route path="/search" component={SearchPage} />
+        <Route path="/orders" component={OrdersPage} />
+        <Route path="/profile" component={ProfilePage} />
+        <Route>
+          <NotFound />
+        </Route>
+      </Switch>
+    </AppLayout>
   );
 }
 
@@ -75,7 +77,7 @@ function App() {
       <TooltipProvider>
         <CartProvider>
           <Toaster />
-          <Router />
+          <RouteManager />
         </CartProvider>
       </TooltipProvider>
     </QueryClientProvider>
