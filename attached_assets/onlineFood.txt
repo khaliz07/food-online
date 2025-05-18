@@ -1,0 +1,221 @@
+Mục tiêu của hệ thống:
+Tạo ra một nền tảng cho phép người dùng đặt món ăn online từ các cửa hàng khác nhau, kết hợp với đơn vị vận chuyển để giao hàng đến tay người dùng một cách nhanh chóng, tiện lợi, hiệu quả.
+
+🧑‍🤝‍🧑 Các vai trò và chức năng chính
+1. User (Khách hàng)
+Người sử dụng dịch vụ để tìm kiếm, đặt đồ ăn, theo dõi đơn hàng.
+
+Chức năng chính:
+
+Đăng ký / đăng nhập
+
+Xem danh sách cửa hàng & món ăn
+
+Tìm kiếm, lọc món ăn / cửa hàng theo vị trí, giá, đánh giá
+
+Đặt món ăn, chọn phương thức thanh toán (online / COD)
+
+Theo dõi đơn hàng đang giao
+
+Đánh giá món ăn và dịch vụ giao hàng
+
+Quản lý lịch sử đơn hàng, thông tin cá nhân
+
+2. Shipping (Người giao hàng)
+Thực hiện nhiệm vụ giao đồ ăn từ cửa hàng đến người dùng.
+
+Chức năng chính:
+
+Đăng nhập
+
+Nhận thông báo đơn giao hàng
+
+Chấp nhận đơn giao hàng
+
+Theo dõi trạng thái đơn (lấy hàng, đang giao, đã giao)
+
+Xem thông tin đơn hàng, vị trí giao
+
+Xem thu nhập, đánh giá từ khách hàng
+
+3. Owner-Saler (Chủ cửa hàng)
+Người đăng ký bán hàng trên hệ thống.
+
+Chức năng chính:
+
+Đăng ký / đăng nhập / đăng ký cửa hàng
+
+Quản lý cửa hàng (thông tin, hình ảnh, giờ hoạt động)
+
+Quản lý thực đơn món ăn
+
+Quản lý đơn hàng (xác nhận, chuẩn bị món ăn)
+
+Xem doanh thu, thống kê đơn hàng, đánh giá
+
+Quản lý khuyến mãi / combo
+
+4. Admin (Quản trị viên hệ thống)
+Quản lý toàn bộ hệ thống, hỗ trợ các bên liên quan.
+
+Chức năng chính:
+
+Quản lý người dùng, shipper, chủ cửa hàng
+
+Duyệt cửa hàng đăng ký
+
+Duyệt / kiểm duyệt món ăn / nội dung / đánh giá
+
+Theo dõi thống kê toàn hệ thống
+
+Quản lý báo cáo vi phạm, tranh chấp đơn hàng
+
+Cấu hình hệ thống: phí ship, % chiết khấu cho seller...
+
+🔄 Luồng hoạt động cơ bản
+User đặt món → chọn cửa hàng → chọn món → đặt đơn → thanh toán
+
+Owner-Saler nhận đơn → chuẩn bị món ăn → chuyển trạng thái “Sẵn sàng”
+
+Shipping nhận đơn → đến cửa hàng lấy món → giao đến khách hàng
+
+User nhận món → đánh giá đơn hàng
+
+Admin theo dõi toàn bộ hệ thống, xử lý tranh chấp nếu có
+
+📊 Một số chỉ số (metrics) có thể theo dõi:
+Thời gian trung bình hoàn thành đơn hàng
+
+Đánh giá trung bình theo từng vai trò
+
+Tỉ lệ đơn bị hủy
+
+Doanh thu theo từng cửa hàng / toàn hệ thống
+
+Thu nhập trung bình của shipper
+
+
+*** Chi tiet
+
+Mục tiêu chính của User (Khách hàng)
+
+Tìm kiếm món ăn theo nhu cầu
+
+Dễ dàng đặt món từ nhiều cửa hàng
+
+Thanh toán đơn hàng nhanh chóng, an toàn
+
+Theo dõi trạng thái đơn hàng theo thời gian thực
+
+Được đánh giá, nhận khuyến mãi, và lưu trữ lịch sử mua hàng
+
+✅ Use Cases chính
+1. Đăng ký / Đăng nhập
+Đăng ký bằng số điện thoại OTP/email verification
+
+Quên mật khẩu, đổi mật khẩu
+
+2. Duyệt món ăn
+Xem danh sách cửa hàng theo khu vực (dựa trên vị trí)
+
+Xem menu của từng cửa hàng
+
+Lọc món theo loại (cơm, bún, nước, v.v.), giá, đánh giá
+
+Xem chi tiết món ăn (mô tả, giá, hình ảnh, đánh giá)
+
+3. Giỏ hàng và đặt hàng
+Thêm món ăn vào giỏ hàng (có thể từ nhiều cửa hàng? → cần xác định)
+
+Cập nhật số lượng / ghi chú cho từng món
+
+Chọn địa chỉ giao hàng (có thể lưu nhiều địa chỉ)
+
+Chọn hình thức thanh toán: COD, ví điện tử, thẻ ngân hàng
+
+Xác nhận đơn hàng
+
+4. Theo dõi đơn hàng
+Xem trạng thái đơn hàng:
+
+Đã xác nhận
+
+Đang chuẩn bị
+
+Đang giao
+
+Đã giao
+
+Hiển thị vị trí shipper (nếu có tích hợp bản đồ real-time)
+
+5. Đánh giá & phản hồi
+Đánh giá món ăn và shipper (sao + bình luận)
+
+Gửi báo cáo khi có sự cố đơn hàng
+
+6. Tài khoản cá nhân
+Quản lý thông tin cá nhân (avatar, số điện thoại, email)
+
+Quản lý địa chỉ giao hàng
+
+Lịch sử đặt hàng
+
+Nhận ưu đãi, mã giảm giá
+
+
+sử dụng Mantine để thiết kế giao diện với phong cách trẻ trung, hiện đại, đặc biệt khi đối tượng người dùng chính là sinh viên. Dưới đây là các điểm cần thống nhất và lên kế hoạch khi thiết kế giao diện cho vai trò User trên web mobile, kết hợp định hướng UX/UI, công nghệ và luồng nghiệp vụ.
+
+2. Các màn hình chính cho Role User (Mobile-first)
+1. Trang chính (Home)
+Thanh tìm kiếm món ăn
+
+Danh sách cửa hàng gần bạn (dựa theo location)
+
+Gợi ý món phổ biến
+
+Banner khuyến mãi
+
+2. Trang menu cửa hàng
+Logo + tên cửa hàng + đánh giá
+
+Giờ hoạt động, khoảng cách
+
+Danh sách món ăn: Card đơn giản (ảnh + tên + giá + nút thêm)
+
+3. Giỏ hàng
+Danh sách món đã chọn (có thể swipe để xóa)
+
+Tổng tiền
+
+Nút “Thanh toán”
+
+4. Thanh toán
+Chọn địa chỉ (Dropdown hoặc thêm mới)
+
+Chọn phương thức thanh toán
+
+Mã giảm giá
+
+Nút xác nhận
+
+5. Theo dõi đơn hàng
+Trạng thái đơn hàng (stepper: đã xác nhận → đang chuẩn bị → đang giao → đã giao)
+
+Hiển thị thời gian ước lượng và tên shipper
+
+(Optional) Mini map nếu có theo dõi vị trí
+
+6. Đánh giá & lịch sử
+Đánh giá đơn hàng sau khi nhận
+
+Xem lại đơn hàng cũ
+
+7. Tài khoản
+Thông tin cá nhân
+
+Địa chỉ đã lưu
+
+Mã giảm giá
+
+Đăng xuất
+
