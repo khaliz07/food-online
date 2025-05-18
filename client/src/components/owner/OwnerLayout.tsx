@@ -45,18 +45,20 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
           </div>
           <nav className="space-y-1 px-3">
             {navItems.map((item) => (
-              <Link key={item.path} href={item.path}>
-                <a
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    location === item.path
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {item.icon}
-                  <span className="ml-3">{item.label}</span>
-                </a>
-              </Link>
+              <div key={item.path}>
+                <Link href={item.path}>
+                  <div
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                      location === item.path
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="ml-3">{item.label}</span>
+                  </div>
+                </Link>
+              </div>
             ))}
           </nav>
           <div className="px-6 mt-auto pt-6">
@@ -88,18 +90,20 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
                       <h2 className="text-lg font-semibold mb-6 px-2">Quản lý cửa hàng</h2>
                       <nav className="space-y-1">
                         {navItems.map((item) => (
-                          <Link key={item.path} href={item.path}>
-                            <a
-                              className={`flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors ${
-                                location === item.path
-                                  ? 'bg-primary/10 text-primary'
-                                  : 'text-gray-700 hover:bg-gray-100'
-                              }`}
-                            >
-                              {item.icon}
-                              <span className="ml-3">{item.label}</span>
-                            </a>
-                          </Link>
+                          <div key={item.path}>
+                            <Link href={item.path}>
+                              <div
+                                className={`flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
+                                  location === item.path
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-gray-700 hover:bg-gray-100'
+                                }`}
+                              >
+                                {item.icon}
+                                <span className="ml-3">{item.label}</span>
+                              </div>
+                            </Link>
+                          </div>
                         ))}
                       </nav>
                     </div>
@@ -135,7 +139,7 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
           </header>
         )}
         
-        <div className="p-6">
+        <div className="p-6 pb-24">
           {children}
         </div>
 
@@ -143,28 +147,28 @@ export default function OwnerLayout({ children }: OwnerLayoutProps) {
         {isMobile && (
           <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-6 flex justify-between items-center">
             <Link href="/owner">
-              <a className={`flex flex-col items-center p-2 ${location === '/owner' ? 'text-primary' : 'text-gray-600'}`}>
+              <div className={`flex flex-col items-center p-2 cursor-pointer ${location === '/owner' ? 'text-primary' : 'text-gray-600'}`}>
                 <Smartphone className="h-5 w-5" />
                 <span className="text-xs mt-1">Tổng quan</span>
-              </a>
+              </div>
             </Link>
             <Link href="/owner/orders">
-              <a className={`flex flex-col items-center p-2 ${location === '/owner/orders' ? 'text-primary' : 'text-gray-600'}`}>
+              <div className={`flex flex-col items-center p-2 cursor-pointer ${location === '/owner/orders' ? 'text-primary' : 'text-gray-600'}`}>
                 <ShoppingBag className="h-5 w-5" />
                 <span className="text-xs mt-1">Đơn hàng</span>
-              </a>
+              </div>
             </Link>
             <Link href="/owner/menu">
-              <a className={`flex flex-col items-center p-2 ${location === '/owner/menu' ? 'text-primary' : 'text-gray-600'}`}>
+              <div className={`flex flex-col items-center p-2 cursor-pointer ${location === '/owner/menu' ? 'text-primary' : 'text-gray-600'}`}>
                 <ChefHat className="h-5 w-5" />
                 <span className="text-xs mt-1">Món ăn</span>
-              </a>
+              </div>
             </Link>
             <Link href="/owner/stats">
-              <a className={`flex flex-col items-center p-2 ${location === '/owner/stats' ? 'text-primary' : 'text-gray-600'}`}>
+              <div className={`flex flex-col items-center p-2 cursor-pointer ${location === '/owner/stats' ? 'text-primary' : 'text-gray-600'}`}>
                 <BarChart2 className="h-5 w-5" />
                 <span className="text-xs mt-1">Thống kê</span>
-              </a>
+              </div>
             </Link>
           </nav>
         )}
