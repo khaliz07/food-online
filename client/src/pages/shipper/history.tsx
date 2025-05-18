@@ -15,25 +15,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DeliveryStats, ShipperOrder } from '@/lib/shipper-types';
+import { Input } from '@/components/ui/input';
+import { DeliveryStats, ShipperOrder, DeliveryStatus } from '@/lib/shipper-types';
 import { 
   BarChart,
   Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip, 
+  Tooltip as RechartsTooltip, 
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
   Legend
 } from 'recharts';
-import { CalendarIcon } from 'lucide-react';
+import { 
+  CalendarIcon, 
+  Search, 
+  SlidersHorizontal, 
+  Calendar as CalendarIcon2,
+  Filter
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
+import { format, subDays, subMonths, isWithinInterval } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 // Mock data cho lịch sử giao hàng
@@ -332,7 +344,7 @@ const CompletedOrderItem = ({ order }: { order: ShipperOrder }) => {
 };
 
 // Custom tooltip cho biểu đồ
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomChartTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-3 shadow-md rounded-md border">
@@ -353,6 +365,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function ShipperHistory() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [period, setPeriod] = useState('week');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterParams, setFilterParams] = useState({
+    status: 'all',
+    paymentMethod: 'all',
+    dateRange: 'month',
+    minAmount: '',
+    maxAmount: '',
+    sortBy: 'newest',
+  });
   
   // Dữ liệu cho biểu đồ tròn
   const pieData = [
@@ -361,6 +383,97 @@ export default function ShipperHistory() {
   ];
   
   const COLORS = ['#4ade80', '#f87171'];
+  
+  // Lọc đơn hàng hoàn thành theo các tiêu chí
+  const filterOrders = () => {
+    let filtered = [...mockCompletedOrders];
+    
+    // Lọc theo thanh tìm kiếm
+    if (searchTerm) {
+      filtered = filtered.filter(order => 
+        order.restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.id.toString().includes(searchTerm)
+      );
+    }
+    
+    // Lọc theo trạng thái
+    if (filterParams.status !== 'all') {
+      filtered = filtered.filter(order => order.deliveryStatus === filterParams.status);
+    }
+    
+    // Lọc theo phương thức thanh toán
+    if (filterParams.paymentMethod !== 'all') {
+      filtered = filtered.filter(order => order.paymentMethod === filterParams.paymentMethod);
+    }
+    
+    // Lọc theo khoảng thời gian
+    if (date) {
+      const startDate = new Date(date);
+      let endDate = new Date(date);
+      
+      if (filterParams.dateRange === 'day') {
+        // Không cần điều chỉnh, đã là ngày hiện tại
+      } else if (filterParams.dateRange === 'week') {
+        startDate.setDate(startDate.getDate() - 7);
+      } else if (filterParams.dateRange === 'month') {
+        startDate.setMonth(startDate.getMonth() - 1);
+      } else if (filterParams.dateRange === 'year') {
+        startDate.setFullYear(startDate.getFullYear() - 1);
+      }
+      
+      filtered = filtered.filter(order => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate >= startDate && orderDate <= endDate;
+      });
+    }
+    
+    // Lọc theo khoảng giá tiền
+    if (filterParams.minAmount) {
+      filtered = filtered.filter(order => order.total >= parseInt(filterParams.minAmount));
+    }
+    
+    if (filterParams.maxAmount) {
+      filtered = filtered.filter(order => order.total <= parseInt(filterParams.maxAmount));
+    }
+    
+    // Sắp xếp
+    if (filterParams.sortBy === 'newest') {
+      filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } else if (filterParams.sortBy === 'oldest') {
+      filtered.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    } else if (filterParams.sortBy === 'highest') {
+      filtered.sort((a, b) => b.total - a.total);
+    } else if (filterParams.sortBy === 'lowest') {
+      filtered.sort((a, b) => a.total - b.total);
+    }
+    
+    return filtered;
+  };
+  
+  const filteredOrders = filterOrders();
+  
+  // Xử lý sự kiện thay đổi bộ lọc
+  const handleFilterChange = (name: string, value: string) => {
+    setFilterParams(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  // Reset tất cả bộ lọc
+  const resetFilters = () => {
+    setFilterParams({
+      status: 'all',
+      paymentMethod: 'all',
+      dateRange: 'month',
+      minAmount: '',
+      maxAmount: '',
+      sortBy: 'newest',
+    });
+    setSearchTerm('');
+  };
   
   // Tính tổng doanh thu
   const totalRevenue = mockCompletedOrders
@@ -409,6 +522,130 @@ export default function ShipperHistory() {
             </PopoverContent>
           </Popover>
         </div>
+      </div>
+      
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="search"
+            placeholder="Tìm kiếm đơn hàng..."
+            className="pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full sm:w-auto gap-2">
+              <SlidersHorizontal className="h-4 w-4" />
+              Bộ lọc
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80" align="end">
+            <div className="space-y-4">
+              <h4 className="font-medium">Lọc đơn hàng</h4>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Trạng thái</label>
+                <Select 
+                  value={filterParams.status} 
+                  onValueChange={(value) => handleFilterChange('status', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn trạng thái" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="delivered">Đã giao</SelectItem>
+                    <SelectItem value="failed">Không giao được</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Phương thức thanh toán</label>
+                <Select 
+                  value={filterParams.paymentMethod} 
+                  onValueChange={(value) => handleFilterChange('paymentMethod', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn phương thức" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="COD">Tiền mặt (COD)</SelectItem>
+                    <SelectItem value="Banking">Chuyển khoản</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Khoảng thời gian</label>
+                <Select 
+                  value={filterParams.dateRange} 
+                  onValueChange={(value) => handleFilterChange('dateRange', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn khoảng thời gian" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="day">1 ngày qua</SelectItem>
+                    <SelectItem value="week">1 tuần qua</SelectItem>
+                    <SelectItem value="month">1 tháng qua</SelectItem>
+                    <SelectItem value="year">1 năm qua</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Khoảng giá (VNĐ)</label>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Từ"
+                    value={filterParams.minAmount}
+                    onChange={(e) => handleFilterChange('minAmount', e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Đến"
+                    value={filterParams.maxAmount}
+                    onChange={(e) => handleFilterChange('maxAmount', e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Sắp xếp theo</label>
+                <Select 
+                  value={filterParams.sortBy} 
+                  onValueChange={(value) => handleFilterChange('sortBy', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sắp xếp theo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Mới nhất</SelectItem>
+                    <SelectItem value="oldest">Cũ nhất</SelectItem>
+                    <SelectItem value="highest">Giá cao nhất</SelectItem>
+                    <SelectItem value="lowest">Giá thấp nhất</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex justify-between pt-2">
+                <Button variant="outline" size="sm" onClick={resetFilters}>
+                  Đặt lại
+                </Button>
+                <Button size="sm" onClick={() => setFilterOpen(false)}>
+                  Áp dụng
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -465,7 +702,7 @@ export default function ShipperHistory() {
                   <XAxis dataKey="date" />
                   <YAxis yAxisId="left" orientation="left" />
                   <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip content={<CustomTooltip />} />
+                  <RechartsTooltip content={<CustomChartTooltip />} />
                   <Legend />
                   <Bar yAxisId="left" dataKey="deliveries" name="Số đơn" fill="#3b82f6" />
                   <Bar yAxisId="right" dataKey="successRate" name="Tỷ lệ thành công (%)" fill="#10b981" />
@@ -497,7 +734,7 @@ export default function ShipperHistory() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <RechartsTooltip />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -520,15 +757,24 @@ export default function ShipperHistory() {
           <CardTitle>Lịch sử giao hàng gần đây</CardTitle>
         </CardHeader>
         <CardContent>
-          {mockCompletedOrders.length > 0 ? (
+          {filteredOrders.length > 0 ? (
             <div className="space-y-2">
-              {mockCompletedOrders.map(order => (
+              {filteredOrders.map(order => (
                 <CompletedOrderItem key={order.id} order={order} />
               ))}
             </div>
           ) : (
             <div className="text-center py-12 bg-gray-50 rounded-md">
-              <p className="text-gray-500">Không có đơn hàng nào</p>
+              <p className="text-gray-500">
+                {searchTerm || Object.values(filterParams).some(v => v !== 'all' && v !== 'month' && v !== 'newest' && v !== '') 
+                  ? 'Không tìm thấy đơn hàng phù hợp với bộ lọc'
+                  : 'Không có đơn hàng nào'}
+              </p>
+              {(searchTerm || Object.values(filterParams).some(v => v !== 'all' && v !== 'month' && v !== 'newest' && v !== '')) && (
+                <Button variant="outline" size="sm" className="mt-4" onClick={resetFilters}>
+                  Xóa bộ lọc
+                </Button>
+              )}
             </div>
           )}
         </CardContent>

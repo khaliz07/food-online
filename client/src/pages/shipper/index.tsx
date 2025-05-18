@@ -7,6 +7,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from '@/components/ui/input';
 import { 
   MapPin, 
   Clock, 
@@ -14,8 +22,16 @@ import {
   Box, 
   Check, 
   X,
-  ChevronRight
+  ChevronRight,
+  Filter,
+  Search,
+  SlidersHorizontal
 } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ShipperOrder, DeliveryStatus } from '@/lib/shipper-types';
 
 // Mock data cho danh sách đơn hàng của shipper
@@ -458,6 +474,14 @@ const OrderCard = ({ order }: { order: ShipperOrder }) => {
 
 export default function ShipperOrderList() {
   const [activeTab, setActiveTab] = useState('active');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterParams, setFilterParams] = useState({
+    paymentMethod: 'all',
+    sortBy: 'newest',
+    minAmount: '',
+    maxAmount: '',
+  });
   
   // Lọc đơn hàng theo trạng thái
   const newOrders = mockOrders.filter(order => order.deliveryStatus === 'new');
@@ -468,9 +492,165 @@ export default function ShipperOrderList() {
   // Đơn đang thực hiện = đơn mới + đang lấy món + đang giao
   const activeOrders = [...newOrders, ...pickingUpOrders, ...deliveringOrders];
   
+  // Lọc theo thanh tìm kiếm
+  const filterBySearchTerm = (orders: ShipperOrder[]) => {
+    if (!searchTerm) return orders;
+    
+    return orders.filter(order => 
+      order.restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.id.toString().includes(searchTerm)
+    );
+  };
+  
+  // Lọc theo các tiêu chí khác
+  const applyFilters = (orders: ShipperOrder[]) => {
+    let filtered = orders;
+    
+    // Lọc theo phương thức thanh toán
+    if (filterParams.paymentMethod !== 'all') {
+      filtered = filtered.filter(order => order.paymentMethod === filterParams.paymentMethod);
+    }
+    
+    // Lọc theo khoảng giá tiền
+    if (filterParams.minAmount) {
+      filtered = filtered.filter(order => order.total >= parseInt(filterParams.minAmount));
+    }
+    
+    if (filterParams.maxAmount) {
+      filtered = filtered.filter(order => order.total <= parseInt(filterParams.maxAmount));
+    }
+    
+    // Sắp xếp
+    if (filterParams.sortBy === 'newest') {
+      filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } else if (filterParams.sortBy === 'oldest') {
+      filtered.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    } else if (filterParams.sortBy === 'highest') {
+      filtered.sort((a, b) => b.total - a.total);
+    } else if (filterParams.sortBy === 'lowest') {
+      filtered.sort((a, b) => a.total - b.total);
+    }
+    
+    return filtered;
+  };
+  
+  // Áp dụng bộ lọc trên đơn hàng
+  const filteredActiveOrders = applyFilters(filterBySearchTerm(activeOrders));
+  const filteredCompletedOrders = applyFilters(filterBySearchTerm(completedOrders));
+  
+  // Xử lý sự kiện thay đổi bộ lọc
+  const handleFilterChange = (name: string, value: string) => {
+    setFilterParams(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  // Reset tất cả bộ lọc
+  const resetFilters = () => {
+    setFilterParams({
+      paymentMethod: 'all',
+      sortBy: 'newest',
+      minAmount: '',
+      maxAmount: '',
+    });
+    setSearchTerm('');
+  };
+  
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold hidden md:block">Danh sách đơn hàng</h1>
+      
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Input
+            type="search"
+            placeholder="Tìm theo địa chỉ, tên nhà hàng, khách hàng..."
+            className="pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full sm:w-auto gap-2">
+              <SlidersHorizontal className="h-4 w-4" />
+              Bộ lọc
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80" align="end">
+            <div className="space-y-4">
+              <h4 className="font-medium">Lọc đơn hàng</h4>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Phương thức thanh toán</label>
+                <Select 
+                  value={filterParams.paymentMethod} 
+                  onValueChange={(value) => handleFilterChange('paymentMethod', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn phương thức" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="COD">Tiền mặt (COD)</SelectItem>
+                    <SelectItem value="Banking">Chuyển khoản</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Sắp xếp theo</label>
+                <Select 
+                  value={filterParams.sortBy} 
+                  onValueChange={(value) => handleFilterChange('sortBy', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sắp xếp theo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Mới nhất</SelectItem>
+                    <SelectItem value="oldest">Cũ nhất</SelectItem>
+                    <SelectItem value="highest">Giá cao nhất</SelectItem>
+                    <SelectItem value="lowest">Giá thấp nhất</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Khoảng giá (VNĐ)</label>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Từ"
+                    value={filterParams.minAmount}
+                    onChange={(e) => handleFilterChange('minAmount', e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Đến"
+                    value={filterParams.maxAmount}
+                    onChange={(e) => handleFilterChange('maxAmount', e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-between pt-2">
+                <Button variant="outline" size="sm" onClick={resetFilters}>
+                  Đặt lại
+                </Button>
+                <Button size="sm" onClick={() => setFilterOpen(false)}>
+                  Áp dụng
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
       
       <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 mb-4">
@@ -486,38 +666,45 @@ export default function ShipperOrderList() {
         </TabsList>
         
         <TabsContent value="active" className="mt-0 space-y-4">
-          {activeOrders.length === 0 ? (
+          {filteredActiveOrders.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-md">
               <Package className="h-12 w-12 text-gray-400 mx-auto" />
               <h3 className="mt-2 font-medium">Không có đơn hàng nào</h3>
               <p className="mt-1 text-sm text-gray-500">
-                Hiện tại bạn không có đơn hàng nào đang thực hiện
+                {searchTerm || Object.values(filterParams).some(v => v !== 'all' && v !== 'newest' && v !== '') 
+                  ? 'Không tìm thấy đơn hàng phù hợp với bộ lọc'
+                  : 'Hiện tại bạn không có đơn hàng nào đang thực hiện'}
               </p>
+              {(searchTerm || Object.values(filterParams).some(v => v !== 'all' && v !== 'newest' && v !== '')) && (
+                <Button variant="outline" size="sm" className="mt-4" onClick={resetFilters}>
+                  Xóa bộ lọc
+                </Button>
+              )}
             </div>
           ) : (
             <>
-              {newOrders.length > 0 && (
+              {filteredActiveOrders.filter(order => order.deliveryStatus === 'new').length > 0 && (
                 <>
                   <h2 className="font-medium text-sm text-gray-500 mt-2">Đơn mới</h2>
-                  {newOrders.map(order => (
+                  {filteredActiveOrders.filter(order => order.deliveryStatus === 'new').map(order => (
                     <OrderCard key={order.id} order={order} />
                   ))}
                 </>
               )}
               
-              {pickingUpOrders.length > 0 && (
+              {filteredActiveOrders.filter(order => order.deliveryStatus === 'picking_up').length > 0 && (
                 <>
                   <h2 className="font-medium text-sm text-gray-500 mt-4">Đang lấy món</h2>
-                  {pickingUpOrders.map(order => (
+                  {filteredActiveOrders.filter(order => order.deliveryStatus === 'picking_up').map(order => (
                     <OrderCard key={order.id} order={order} />
                   ))}
                 </>
               )}
               
-              {deliveringOrders.length > 0 && (
+              {filteredActiveOrders.filter(order => order.deliveryStatus === 'delivering').length > 0 && (
                 <>
                   <h2 className="font-medium text-sm text-gray-500 mt-4">Đang giao</h2>
-                  {deliveringOrders.map(order => (
+                  {filteredActiveOrders.filter(order => order.deliveryStatus === 'delivering').map(order => (
                     <OrderCard key={order.id} order={order} />
                   ))}
                 </>
@@ -527,16 +714,23 @@ export default function ShipperOrderList() {
         </TabsContent>
         
         <TabsContent value="completed" className="mt-0">
-          {completedOrders.length === 0 ? (
+          {filteredCompletedOrders.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-md">
               <Check className="h-12 w-12 text-gray-400 mx-auto" />
               <h3 className="mt-2 font-medium">Không có đơn hàng nào</h3>
               <p className="mt-1 text-sm text-gray-500">
-                Bạn chưa hoàn thành đơn hàng nào
+                {searchTerm || Object.values(filterParams).some(v => v !== 'all' && v !== 'newest' && v !== '') 
+                  ? 'Không tìm thấy đơn hàng phù hợp với bộ lọc'
+                  : 'Bạn chưa hoàn thành đơn hàng nào'}
               </p>
+              {(searchTerm || Object.values(filterParams).some(v => v !== 'all' && v !== 'newest' && v !== '')) && (
+                <Button variant="outline" size="sm" className="mt-4" onClick={resetFilters}>
+                  Xóa bộ lọc
+                </Button>
+              )}
             </div>
           ) : (
-            completedOrders.map(order => (
+            filteredCompletedOrders.map(order => (
               <OrderCard key={order.id} order={order} />
             ))
           )}
