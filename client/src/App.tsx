@@ -38,6 +38,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import AdminDashboard from "@/pages/admin/index";
 import AdminUsers from "@/pages/admin/users";
 import AdminSales from "@/pages/admin/sales";
+import AdminShippers from "@/pages/admin/shippers";
 
 // Route helper component to differentiate between different user roles routes
 function RouteManager() {
@@ -95,6 +96,7 @@ function RouteManager() {
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/users" component={AdminUsers} />
           <Route path="/admin/sales" component={AdminSales} />
+          <Route path="/admin/shippers" component={AdminShippers} />
           <Route>
             <NotFound />
           </Route>
