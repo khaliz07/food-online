@@ -33,6 +33,12 @@ import ShipperHistory from "@/pages/shipper/history";
 import ShipperNotifications from "@/pages/shipper/notifications";
 import ShipperProfile from "@/pages/shipper/profile";
 
+// Admin pages
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminDashboard from "@/pages/admin/index";
+import AdminUsers from "@/pages/admin/users";
+import AdminSales from "@/pages/admin/sales";
+
 // Route helper component to differentiate between different user roles routes
 function RouteManager() {
   const [location] = useLocation();
@@ -42,6 +48,9 @@ function RouteManager() {
   
   // Check if current path is a shipper path
   const isShipperPath = location.startsWith('/shipper');
+  
+  // Check if current path is an admin path
+  const isAdminPath = location.startsWith('/admin');
   
   if (isOwnerPath) {
     return (
@@ -76,6 +85,21 @@ function RouteManager() {
           </Route>
         </Switch>
       </ShipperLayout>
+    );
+  }
+  
+  if (isAdminPath) {
+    return (
+      <AdminLayout>
+        <Switch>
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/users" component={AdminUsers} />
+          <Route path="/admin/sales" component={AdminSales} />
+          <Route>
+            <NotFound />
+          </Route>
+        </Switch>
+      </AdminLayout>
     );
   }
   

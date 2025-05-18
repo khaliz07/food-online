@@ -1,0 +1,98 @@
+Role: Admin (Quản trị viên hệ thống)
+🎯 Mục tiêu chính
+Quản lý và kiểm soát toàn bộ hoạt động của hệ thống.
+
+Theo dõi người dùng, đơn hàng, doanh thu, hoạt động của shipper và saler.
+
+Duyệt / chặn các saler, xử lý các khiếu nại.
+
+Báo cáo – thống kê toàn diện.
+
+🧭 Chức năng chính của Admin
+1. Trang tổng quan (Dashboard)
+Thống kê số lượng người dùng, saler, shipper.
+
+Số đơn hôm nay, tuần này, đơn thành công/thất bại.
+
+Doanh thu hệ thống.
+
+Biểu đồ đơn hàng theo thời gian.
+
+Danh sách đơn hàng mới nhất.
+
+🧩 UI đề xuất: Grid, Stats, Chart, Card, Badge, Timeline (Mantine)
+
+2. Quản lý người dùng
+Danh sách user (tên, email, số điện thoại, số đơn đã đặt).
+
+Có thể tìm kiếm, lọc, sắp xếp.
+
+Chặn / mở khóa tài khoản người dùng.
+
+3. Quản lý saler (chủ quán)
+Danh sách saler đã đăng ký.
+
+Duyệt / từ chối saler mới.
+
+Chỉnh sửa thông tin quán (nếu cần).
+
+Ghi chú, theo dõi lịch sử hoạt động của saler.
+
+Thống kê số đơn hàng, doanh thu từng quán.
+
+4. Quản lý shipper
+Danh sách shipper đang hoạt động.
+
+Trạng thái hiện tại (đang rảnh, đang giao, offline).
+
+Lịch sử giao hàng của từng shipper.
+
+Tỷ lệ giao thành công / thất bại.
+
+Khóa / mở tài khoản shipper nếu vi phạm.
+
+5. Quản lý đơn hàng
+Xem tất cả đơn hàng trong hệ thống.
+
+Lọc theo thời gian, trạng thái, người dùng, quán, shipper.
+
+Xem chi tiết từng đơn (tương tự shipper/saler).
+
+Thống kê đơn theo ngày, tuần, tháng.
+
+6. Hệ thống báo cáo – khiếu nại
+Người dùng, shipper, saler có thể gửi khiếu nại.
+
+Admin tiếp nhận, xử lý, phản hồi.
+
+Lưu log xử lý từng khiếu nại.
+
+7. Quản lý hệ thống
+Phân quyền tài khoản nội bộ (nếu hệ thống có nhiều admin nhỏ).
+
+Quản lý thông báo hệ thống gửi tới người dùng.
+
+Thiết lập chính sách giao hàng, phí, quy định.
+
+💡 UI Gợi ý (Mantine + PC layout)
+Giao diện admin nên tối ưu cho desktop.
+
+Sử dụng Table, Tabs, Accordion, Stats, Pagination, DateRangePicker.
+
+Thống kê có thể dùng recharts hoặc Mantine Charts.
+
+🧩 Gợi ý chia màn hình chính
+Dashboard
+
+User Management
+
+Saler Management
+
+Shipper Management
+
+Order Management
+
+Complaints / Reports
+
+System Settings
+
