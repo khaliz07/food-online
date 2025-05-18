@@ -603,7 +603,18 @@ export default function ShipperProfile() {
                     
                     <div className="border rounded-lg p-4 flex items-center">
                       <div className="bg-purple-100 p-3 rounded-full mr-4">
-                        <Check className="h-5 w-5 text-purple-600" />
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24" 
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-5 w-5 text-purple-600"
+                        >
+                          <path d="M20 6 9 17l-5-5"/>
+                        </svg>
                       </div>
                       <div>
                         <p className="font-medium">Shipper đáng tin cậy</p>

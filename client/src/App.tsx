@@ -25,12 +25,23 @@ import OwnerProfile from "@/pages/owner/profile";
 import OwnerNotifications from "@/pages/owner/notifications";
 import OwnerLayout from "@/components/owner/OwnerLayout";
 
-// Route helper component to differentiate between owner and customer routes
+// Shipper pages
+import ShipperLayout from "@/components/shipper/ShipperLayout";
+import ShipperOrderList from "@/pages/shipper/index";
+import ShipperOrderDetail from "@/pages/shipper/order/[id]";
+import ShipperHistory from "@/pages/shipper/history";
+import ShipperNotifications from "@/pages/shipper/notifications";
+import ShipperProfile from "@/pages/shipper/profile";
+
+// Route helper component to differentiate between different user roles routes
 function RouteManager() {
   const [location] = useLocation();
   
   // Check if current path is an owner path
   const isOwnerPath = location.startsWith('/owner');
+  
+  // Check if current path is a shipper path
+  const isShipperPath = location.startsWith('/shipper');
   
   if (isOwnerPath) {
     return (
@@ -48,6 +59,23 @@ function RouteManager() {
           </Route>
         </Switch>
       </OwnerLayout>
+    );
+  }
+  
+  if (isShipperPath) {
+    return (
+      <ShipperLayout>
+        <Switch>
+          <Route path="/shipper" component={ShipperOrderList} />
+          <Route path="/shipper/order/:id" component={ShipperOrderDetail} />
+          <Route path="/shipper/history" component={ShipperHistory} />
+          <Route path="/shipper/notifications" component={ShipperNotifications} />
+          <Route path="/shipper/profile" component={ShipperProfile} />
+          <Route>
+            <NotFound />
+          </Route>
+        </Switch>
+      </ShipperLayout>
     );
   }
   
