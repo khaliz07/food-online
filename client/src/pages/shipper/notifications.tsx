@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ShipperNotification } from '@/lib/shipper-types';
 import { 
@@ -13,8 +14,16 @@ import {
   TrendingUp, 
   CheckCircle, 
   Trash2, 
-  MailOpen
+  MailOpen,
+  Search
 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Mock data cho thông báo
 const mockNotifications: ShipperNotification[] = [
@@ -213,12 +222,49 @@ export default function ShipperNotifications() {
   const [notifications, setNotifications] = useState<ShipperNotification[]>(mockNotifications);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [activeTab, setActiveTab] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  
+  // Lọc thông báo theo tab và tìm kiếm
+  const filterNotifications = (notificationList: ShipperNotification[]) => {
+    // Lọc theo từ khóa tìm kiếm
+    if (searchTerm) {
+      notificationList = notificationList.filter(notification => 
+        notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        notification.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (notification.orderId && notification.orderId.toString().includes(searchTerm))
+      );
+    }
+    
+    // Sắp xếp theo tiêu chí
+    if (sortBy === 'newest') {
+      notificationList.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } else if (sortBy === 'oldest') {
+      notificationList.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    } else if (sortBy === 'unread_first') {
+      notificationList.sort((a, b) => {
+        if (a.isRead === b.isRead) {
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        }
+        return a.isRead ? 1 : -1; // Chưa đọc lên đầu
+      });
+    }
+    
+    return notificationList;
+  };
   
   // Lọc thông báo theo tab
-  const unreadNotifications = notifications.filter(n => !n.isRead);
-  const orderNotifications = notifications.filter(n => n.type === 'new_order');
-  const systemNotifications = notifications.filter(n => n.type === 'system');
-  const statusNotifications = notifications.filter(n => n.type === 'status_update');
+  const baseUnreadNotifications = notifications.filter(n => !n.isRead);
+  const baseOrderNotifications = notifications.filter(n => n.type === 'new_order');
+  const baseSystemNotifications = notifications.filter(n => n.type === 'system');
+  const baseStatusNotifications = notifications.filter(n => n.type === 'status_update');
+  
+  // Áp dụng bộ lọc
+  const unreadNotifications = filterNotifications(baseUnreadNotifications);
+  const orderNotifications = filterNotifications(baseOrderNotifications);
+  const systemNotifications = filterNotifications(baseSystemNotifications);
+  const statusNotifications = filterNotifications(baseStatusNotifications);
+  const filteredNotifications = filterNotifications([...notifications]);
   
   // Xử lý chọn/bỏ chọn tất cả
   const handleSelectAll = (checked: boolean) => {
@@ -240,7 +286,7 @@ export default function ShipperNotifications() {
           idsToSelect = statusNotifications.map(n => n.id);
           break;
         default:
-          idsToSelect = notifications.map(n => n.id);
+          idsToSelect = filteredNotifications.map(n => n.id);
       }
       
       setSelectedIds(idsToSelect);
@@ -355,11 +401,22 @@ export default function ShipperNotifications() {
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <CardTitle>Thông báo của bạn</CardTitle>
           <div className="text-sm text-muted-foreground">
-            {unreadNotifications.length} chưa đọc
+            {baseUnreadNotifications.length} chưa đọc
           </div>
         </CardHeader>
+        
         <div className="px-6 py-2 border-b border-gray-100">
-          <div className="flex justify-between items-center">
+          <div className="relative mb-3">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              type="search"
+              placeholder="Tìm kiếm thông báo..."
+              className="pl-9"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-between items-center mt-2">
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id="selectAll" 
@@ -374,26 +431,42 @@ export default function ShipperNotifications() {
               </label>
             </div>
             
-            <div className="space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleMarkSelectedAsRead}
-                disabled={selectedIds.length === 0}
+            <div className="flex items-center gap-2">
+              <Select 
+                value={sortBy} 
+                onValueChange={setSortBy}
               >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Đánh dấu đã đọc
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleDeleteSelected}
-                disabled={selectedIds.length === 0}
-                className="border-red-200 text-red-600 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Xóa đã chọn
-              </Button>
+                <SelectTrigger className="w-[150px] h-8 text-xs">
+                  <SelectValue placeholder="Sắp xếp theo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Mới nhất</SelectItem>
+                  <SelectItem value="oldest">Cũ nhất</SelectItem>
+                  <SelectItem value="unread_first">Chưa đọc trước</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <div className="space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleMarkSelectedAsRead}
+                  disabled={selectedIds.length === 0}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Đánh dấu đã đọc
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleDeleteSelected}
+                  disabled={selectedIds.length === 0}
+                  className="border-red-200 text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Xóa đã chọn
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -420,9 +493,9 @@ export default function ShipperNotifications() {
           </div>
           
           <TabsContent value="all" className="pt-0">
-            {notifications.length > 0 ? (
+            {filteredNotifications.length > 0 ? (
               <div className="max-h-[70vh] overflow-y-auto">
-                {notifications.map(notification => (
+                {filteredNotifications.map(notification => (
                   <NotificationItem
                     key={notification.id}
                     notification={notification}
@@ -438,8 +511,13 @@ export default function ShipperNotifications() {
                 <Bell className="mx-auto h-12 w-12 text-gray-300" />
                 <h3 className="mt-2 text-lg font-medium">Không có thông báo</h3>
                 <p className="mt-1 text-gray-500">
-                  Bạn không có thông báo nào trong hệ thống.
+                  {searchTerm ? 'Không tìm thấy thông báo nào phù hợp với từ khóa tìm kiếm.' : 'Bạn không có thông báo nào trong hệ thống.'}
                 </p>
+                {searchTerm && (
+                  <Button variant="outline" size="sm" className="mt-4" onClick={() => setSearchTerm('')}>
+                    Xóa tìm kiếm
+                  </Button>
+                )}
               </div>
             )}
           </TabsContent>
